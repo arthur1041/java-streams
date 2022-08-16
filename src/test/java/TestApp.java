@@ -4,10 +4,7 @@ import com.artcruz.Person;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class TestApp {
@@ -41,12 +38,48 @@ public class TestApp {
     }
 
     @Test
+    void imperativeSort() {
+        boolean sorted;
+
+        do {
+            sorted = true;
+
+            for (int i = 0; i < people.size() - 1; i++) {
+                int j = i + 1;
+                Person person = people.get(i);
+                Person nextPerson = people.get(j);
+
+                if (person.getAge() > nextPerson.getAge()) {
+                    sorted = false;
+                    people.set(i, nextPerson);
+                    people.set(j, person);
+                }
+            }
+        } while (!sorted);
+
+        people.forEach(System.out::println);
+    }
+
+    @Test
     void declarativeSort() {
         List<Person> sorted = people.stream()
-                .sorted(Comparator.comparing(Person::getAge).reversed())
+                .sorted(Comparator.comparing(Person::getAge))
                 .toList();
 
         sorted.forEach(System.out::println);
+    }
+
+    @Test
+    void imperativeAllMatch() {
+        boolean allMatch = true;
+
+        for(Person person : people){
+            if (person.getAge() <= 5) {
+                allMatch = false;
+            }
+        }
+
+        System.out.println(allMatch);
     }
 
     @Test
@@ -58,6 +91,20 @@ public class TestApp {
     }
 
     @Test
+    void imperativeAnyMatch() {
+        boolean anyMatch = false;
+
+        for(Person person : people){
+            if (person.getAge() > 8) {
+                anyMatch = true;
+            }
+        }
+
+        System.out.println(anyMatch);
+
+    }
+
+    @Test
     void declarativeAnyMatch() {
         boolean anyMatch = people.stream()
                 .anyMatch(person -> person.getAge() > 8);
@@ -66,11 +113,37 @@ public class TestApp {
     }
 
     @Test
+    void imperativeNoneMatch() {
+        boolean noneMatch = true;
+
+        for(Person person : people){
+            if ("Antonio".equals(person.getName())) {
+                noneMatch = false;
+            }
+        }
+
+        System.out.println(noneMatch);
+    }
+
+    @Test
     void declarativeNoneMatch() {
         boolean noneMatch = people.stream()
                 .noneMatch(person -> person.getName().equals("Antonio"));
 
         System.out.println(noneMatch);
+    }
+
+    @Test
+    void imperativeMax() {
+        int maxAge = people.get(0).getAge();
+
+        for (Person person : people) {
+            if(person.getAge() > maxAge) {
+                maxAge = person.getAge();
+            }
+        }
+
+        System.out.println(maxAge);
     }
 
     @Test
@@ -83,6 +156,19 @@ public class TestApp {
     }
 
     @Test
+    void imperativeMin() {
+        int minAge = people.get(0).getAge();
+
+        for (Person person : people) {
+            if(person.getAge() < minAge) {
+                minAge = person.getAge();
+            }
+        }
+
+        System.out.println(minAge);
+    }
+
+    @Test
     void declarativeMin() {
         Person person = people.stream()
                 .min(Comparator.comparing(Person::getAge))
@@ -92,13 +178,32 @@ public class TestApp {
     }
 
     @Test
+    void imperativeGroup(){
+        Map<Gender, List<Person>> pplGroupedByGender = new HashMap<>();
+
+        for (Person person : people) {
+            if(pplGroupedByGender.containsKey(person.getGender())){
+                pplGroupedByGender.get(person.getGender()).add(person);
+            } else {
+                pplGroupedByGender.put(person.getGender(), new ArrayList<>(Arrays.asList(person)));
+            }
+        }
+
+        pplGroupedByGender.forEach(((gender, people) -> {
+            System.out.println(gender);
+            people.forEach(System.out::println);
+            System.out.println();
+        }));
+    }
+
+    @Test
     void declarativeGroup() {
         Map<Gender, List<Person>> pplGroupedByGender = people.stream()
                 .collect(Collectors.groupingBy(Person::getGender));
 
-        pplGroupedByGender.forEach(((gender, people1) -> {
+        pplGroupedByGender.forEach(((gender, people) -> {
             System.out.println(gender);
-            people1.forEach(System.out::println);
+            people.forEach(System.out::println);
             System.out.println();
         }));
     }
@@ -108,9 +213,34 @@ public class TestApp {
         String oldestPersonName = people.stream()
                 .filter(person -> person.getGender().equals(Gender.FEMALE))
                 .max(Comparator.comparing(Person::getAge))
-                .map(Person::getName).orElse(null);
+                .map(person -> "Name: " + person.getName() + "\nAge: " + person.getAge())
+                .orElse(null);
 
         System.out.println(oldestPersonName);
+    }
+
+    @Test
+    void streamMethodsChainExampleImperativeEquivalent() {
+        List<Person> females = new ArrayList<>();
+
+        for (Person person : people) {
+            if (person.getGender().equals(Gender.FEMALE)) {
+                females.add(person);
+            }
+        }
+
+        int maxAge = people.get(0).getAge();
+
+        Person oldestPerson = people.get(0);
+
+        for (Person person : females) {
+            if(person.getAge() > maxAge) {
+                maxAge = person.getAge();
+                oldestPerson = person;
+            }
+        }
+
+        System.out.println("Name: " + oldestPerson.getName() + "\nAge: " + oldestPerson.getAge());
     }
 
 }

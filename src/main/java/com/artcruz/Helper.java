@@ -1,11 +1,12 @@
 package com.artcruz;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Helper {
 
      public static List<Person> getPeople() {
-        return List.of(
+        return Arrays.asList(
                 new Person("Antonio", 20, Gender.MALE),
                 new Person("Alina Smith", 33, Gender.FEMALE),
                 new Person("Helen White", 57, Gender.FEMALE),
